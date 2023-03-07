@@ -4,7 +4,7 @@ import io from "socket.io-client";
 export const ChatBox = () => {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
-  const [socket, setSocket] = useState(null);
+  const [socket, setSocket] = useState<SocketIOClient.Socket | null>(null);
   const [username, setUsername] = useState("");
   const messagesEndRef = useRef(null);
 
