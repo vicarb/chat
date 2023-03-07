@@ -1,33 +1,55 @@
 import React, { useState, useEffect, useRef } from "react";
 import io from "socket.io-client";
+import * as SocketIOClient from 'socket.io-client';
+
+interface Message {
+  text: string;
+  sender: string;
+}
 
 export const ChatBox = () => {
-  const [messages, setMessages] = useState([]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [socket, setSocket] = useState<SocketIOClient.Socket | null>(null);
   const [username, setUsername] = useState("");
-  const messagesEndRef = useRef(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
 
   useEffect(() => {
-    const newSocket = io("http://locahost:4000");
-    setSocket(newSocket);
-
-    return () => newSocket.close();
+    const newSocket = io("http://localhost:4000");
+  
+    if (newSocket) {
+      setSocket(newSocket);
+    }
+  
+    return ():void => {
+      if (newSocket) {
+        newSocket.close();
+      }
+    };
   }, []);
+  
+  
 
   useEffect(() => {
     if (!socket) return;
-
-    socket.on("message", (message) => {
+  
+    const handleMessage = (message: any) => {
       setMessages((prevMessages) => [...prevMessages, message]);
-    });
-
+    };
+  
+    socket.on("message", handleMessage);
+  
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
-
-    return () => socket.off("message");
+  
+    return () => {
+      socket.off("message", handleMessage);
+    };
   }, [socket, messages]);
+  
+  
 
   useEffect(() => {
     if (messagesEndRef.current) {
@@ -38,7 +60,7 @@ export const ChatBox = () => {
   const sendMessage = () => {
     if (input !== "") {
       const message = { sender: username, text: input };
-      socket.emit("message", message);
+      socket?.emit("message", message);
       setMessages((prevMessages) => [...prevMessages, message]);
       setInput("");
     }
@@ -105,3 +127,4 @@ export const ChatBox = () => {
     </div>
   );
 };
+
