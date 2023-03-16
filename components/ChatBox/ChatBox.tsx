@@ -35,6 +35,7 @@ export const ChatBox = () => {
     if (!socket) return;
   
     const handleMessage = (message: any) => {
+      console.log(message):
       setMessages((prevMessages) => [...prevMessages, message]);
     };
   
